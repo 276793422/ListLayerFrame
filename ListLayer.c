@@ -626,7 +626,7 @@ LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, MODE_INFO *pModInfo, PVO
 			if (pModInfo->dwLayer == pLayerInfo->info.dwLayer)
 			{
 				//	层相同并且名字相同
-				if (pListLayer->lmf.MemCmp(NULL, pModInfo, &pLayerInfo->info, sizeof(*pModInfo)) == sizeof(*pModInfo))
+				if (pListLayer->lmf.MemCmp(NULL, pModInfo, &pLayerInfo->info, sizeof(*pModInfo)) == 0)
 				{
 					if (!__IsInvalidPoint(ppLayerInfo))
 					{
@@ -1086,7 +1086,7 @@ BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
 	{
 		//	查询规则
 		//bRet = RuleTable_SearchRuleTable(pLayerInfo->RuleTable, pRule, pOut);
-		pLayerInfo->rmf.SearchRuleInTable(pLayerInfo, pLayerInfo->RuleTable, pLayerInfo->pRuleTablePool, pLayerInfo->pRuleTablePoolLock, pRule, pOut);
+		bRet = pLayerInfo->rmf.SearchRuleInTable(pLayerInfo, pLayerInfo->RuleTable, pLayerInfo->pRuleTablePool, pLayerInfo->pRuleTablePoolLock, pRule, pOut);
 	} while (FALSE);
 
 	return bRet;
