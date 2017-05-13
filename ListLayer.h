@@ -150,30 +150,30 @@ typedef ULONG (*ZooTypeFunc_ListLayer_MemoryCmp)(PVOID pThis, PVOID _Dst, PVOID 
 //	框架管理接口，内部管理每一层的内存等信息
 typedef struct _LIST_LAYER_MEMORY_FUNCTION
 {
-	ZooTypeFunc_ListLayer_AllocTrieMemory AllocListMemory;
-	ZooTypeFunc_ListLayer_DestroyTrieMemory DestroyListMemory;
+	ZooTypeFunc_ListLayer_AllocTrieMemory					AllocListMemory;
+	ZooTypeFunc_ListLayer_DestroyTrieMemory					DestroyListMemory;
 
-	ZooTypeFunc_ListLayer_InitListLayerLock InitListLayerLock;
-	ZooTypeFunc_ListLayer_DestroyListLayerLock DestroyListLayerLock;
-	ZooTypeFunc_ListLayer_GetListLayerLock GetListLayerLock;
-	ZooTypeFunc_ListLayer_ReleaseListLayerLock ReleaseListLayerLock;
+	ZooTypeFunc_ListLayer_InitListLayerLock					InitListLayerLock;
+	ZooTypeFunc_ListLayer_DestroyListLayerLock				DestroyListLayerLock;
+	ZooTypeFunc_ListLayer_GetListLayerLock					GetListLayerLock;
+	ZooTypeFunc_ListLayer_ReleaseListLayerLock				ReleaseListLayerLock;
 
-	ZooTypeFunc_ListLayer_InitRuleInfoPoolLock InitRuleInfoPoolLock;
-	ZooTypeFunc_ListLayer_DestroyRuleInfoPoolLock DestroyRuleInfoPoolLock;
-	ZooTypeFunc_ListLayer_GetRuleInfoPoolLockForRead GetRuleInfoPoolLockForRead;
-	ZooTypeFunc_ListLayer_ReleaseRuleInfoPoolLockForRead ReleaseRuleInfoPoolLockForRead;
-	ZooTypeFunc_ListLayer_GetRuleInfoPoolLockForWrite GetRuleInfoPoolLockForWrite;
-	ZooTypeFunc_ListLayer_ReleaseRuleInfoPoolLockForWrite ReleaseRuleInfoPoolLockForWrite;
+	ZooTypeFunc_ListLayer_InitRuleInfoPoolLock				InitRuleInfoPoolLock;
+	ZooTypeFunc_ListLayer_DestroyRuleInfoPoolLock			DestroyRuleInfoPoolLock;
+	ZooTypeFunc_ListLayer_GetRuleInfoPoolLockForRead		GetRuleInfoPoolLockForRead;
+	ZooTypeFunc_ListLayer_ReleaseRuleInfoPoolLockForRead	ReleaseRuleInfoPoolLockForRead;
+	ZooTypeFunc_ListLayer_GetRuleInfoPoolLockForWrite		GetRuleInfoPoolLockForWrite;
+	ZooTypeFunc_ListLayer_ReleaseRuleInfoPoolLockForWrite	ReleaseRuleInfoPoolLockForWrite;
 
 
-	ZooTypeFunc_ListLayer_InitListInfoPool InitListInfoPool;
-	ZooTypeFunc_ListLayer_DestroyListInfoPool DestroyListInfoPool;
-	ZooTypeFunc_ListLayer_AllocListInfoFromPool AllocListInfoFromPool;
-	ZooTypeFunc_ListLayer_FreeListInfoToPool FreeListInfoToPool;
+	ZooTypeFunc_ListLayer_InitListInfoPool					InitListInfoPool;
+	ZooTypeFunc_ListLayer_DestroyListInfoPool				DestroyListInfoPool;
+	ZooTypeFunc_ListLayer_AllocListInfoFromPool				AllocListInfoFromPool;
+	ZooTypeFunc_ListLayer_FreeListInfoToPool				FreeListInfoToPool;
 
-	ZooTypeFunc_ListLayer_MemorySet MemSet;
-	ZooTypeFunc_ListLayer_MemoryCopy MemCpy;
-	ZooTypeFunc_ListLayer_MemoryCmp MemCmp;
+	ZooTypeFunc_ListLayer_MemorySet							MemSet;
+	ZooTypeFunc_ListLayer_MemoryCopy						MemCpy;
+	ZooTypeFunc_ListLayer_MemoryCmp							MemCmp;
 
 }LIST_LAYER_MEMORY_FUNCTION, *PLIST_LAYER_MEMORY_FUNCTION;
 
@@ -213,20 +213,20 @@ typedef ULONG (*ZooTypeFunc_ListInfo_MemoryCopy)(PVOID pThis, PVOID _Dst, PVOID 
 //	层管理接口，内部管理当前层的数据
 typedef struct _LIST_INFO_MEMORY_FUNCTION
 {
-	ZooTypeFunc_ListLayer_InitRuleTablePool InitRulePool;
-	ZooTypeFunc_ListLayer_DestroyRuleTablePool DestroyRulePool;
-	ZooTypeFunc_ListLayer_AllocRuleTableFromPool AllocRuleFromPool;
-	ZooTypeFunc_ListLayer_FreeRuleTableToPool FreeRuleToPool;
+	ZooTypeFunc_ListLayer_InitRuleTablePool					InitRulePool;
+	ZooTypeFunc_ListLayer_DestroyRuleTablePool				DestroyRulePool;
+	ZooTypeFunc_ListLayer_AllocRuleTableFromPool			AllocRuleFromPool;
+	ZooTypeFunc_ListLayer_FreeRuleTableToPool				FreeRuleToPool;
 
-	ZooTypeFunc_ListLayer_InitRuleTablePoolLock InitRuleTablePoolLock;
-	ZooTypeFunc_ListLayer_DestroyRuleTablePoolLock DestroyRuleTablePoolLock;
-	ZooTypeFunc_ListLayer_GetRuleTablePoolLockForRead GetRuleTablePoolLockForRead;
-	ZooTypeFunc_ListLayer_ReleaseRuleTablePoolLockForRead ReleaseRuleTablePoolLockForRead;
-	ZooTypeFunc_ListLayer_GetRuleTablePoolLockForWrite GetRuleTablePoolLockForWrite;
-	ZooTypeFunc_ListLayer_ReleaseRuleTablePoolLockForWrite ReleaseRuleTablePoolLockForWrite;
+	ZooTypeFunc_ListLayer_InitRuleTablePoolLock				InitRuleTablePoolLock;
+	ZooTypeFunc_ListLayer_DestroyRuleTablePoolLock			DestroyRuleTablePoolLock;
+	ZooTypeFunc_ListLayer_GetRuleTablePoolLockForRead		GetRuleTablePoolLockForRead;
+	ZooTypeFunc_ListLayer_ReleaseRuleTablePoolLockForRead	ReleaseRuleTablePoolLockForRead;
+	ZooTypeFunc_ListLayer_GetRuleTablePoolLockForWrite		GetRuleTablePoolLockForWrite;
+	ZooTypeFunc_ListLayer_ReleaseRuleTablePoolLockForWrite	ReleaseRuleTablePoolLockForWrite;
 	
-	ZooTypeFunc_ListInfo_MemorySet MemSet;
-	ZooTypeFunc_ListInfo_MemoryCopy MemCpy;
+	ZooTypeFunc_ListInfo_MemorySet							MemSet;
+	ZooTypeFunc_ListInfo_MemoryCopy							MemCpy;
 
 }LIST_INFO_MEMORY_FUNCTION, *PLIST_INFO_MEMORY_FUNCTION;
 
@@ -248,11 +248,11 @@ typedef BOOLEAN (* ZooTypeFunc_RuleTable_RemoveRuleFromTable)(PVOID pLayerInfo, 
 
 typedef struct _LIST_RULE_MEMORY_FUNCTION 
 {
-	ZooTypeFunc_RuleTable_InitRuleTable InitRuleTable;
-	ZooTypeFunc_RuleTable_DestoryRuleTable DestoryRuleTable;
-	ZooTypeFunc_RuleTable_SearchRuleInTable SearchRuleInTable;
-	ZooTypeFunc_RuleTable_AddRuleToTable AddRuleToTable;
-	ZooTypeFunc_RuleTable_RemoveRuleFromTable RemoveRuleFromTable;
+	ZooTypeFunc_RuleTable_InitRuleTable			InitRuleTable;
+	ZooTypeFunc_RuleTable_DestoryRuleTable		DestoryRuleTable;
+	ZooTypeFunc_RuleTable_SearchRuleInTable		SearchRuleInTable;
+	ZooTypeFunc_RuleTable_AddRuleToTable		AddRuleToTable;
+	ZooTypeFunc_RuleTable_RemoveRuleFromTable	RemoveRuleFromTable;
 }LIST_RULE_MEMORY_FUNCTION, *PLIST_RULE_MEMORY_FUNCTION;
 
 
