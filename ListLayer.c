@@ -120,35 +120,91 @@ typedef struct _LAYER_INFO
 
 //////////////////////////////////////////////////////////////////////////
 //	初始化整个规则层链
+//	参数：
+//		pThis		：返回参数初始化出来的整个规则链
+//		dwRuleLen	：每个规则节点的最终规则信息长度
+//		pLfl		：内部所需全部平台相关函数
+//	返回值：
+//		TRUE		：创建成功
+//		FALSE		：创建失败
 //
-BOOLEAN ZooListLayer_InitListLayer(PVOID *ppThis, ULONG dwRuleLen, PLIST_FUNCTION_LIST pLfl);
+BOOLEAN __ZooListLayer_InitListLayer(PVOID *pThis, ULONG dwRuleLen, PLIST_FUNCTION_LIST pLfl);
 
 //////////////////////////////////////////////////////////////////////////
 //	销毁规则层链
+//	参数：
+//		pThis		：要销毁的整个规则链对象
+//	返回值：
+//		TRUE		：销毁成功
+//		FALSE		：销毁失败
 //
-BOOLEAN ZooListLayer_DestoryListLayer(PVOID *pThis);
+BOOLEAN __ZooListLayer_DestoryListLayer(PVOID *pThis);
 
 //////////////////////////////////////////////////////////////////////////
 //	获取当前内部列表层数量
 //	参数：
-//		pListLayer	：整个规则列表的表头
+//		pThis		：整个规则列表的表头
 //	返回值：
 //		返回内部列表层数量
 //
-ULONG ZooListLayer_GetLayerInfoCount(PVOID pThis);
+ULONG __ZooListLayer_GetLayerInfoCount(PVOID pThis);
 
-BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, PMODE_INFO pMode);
+//////////////////////////////////////////////////////////////////////////
+//	根据索引获取指定层的Mod
+//	参数：
+//		pThis		：整个规则列表的表头
+//		ulIndex		：要获取的规则对应索引
+//		pMode		：输出参数，获取到的MODE信息
+//	返回值：
+//		TRUE		：获取成功
+//		FALSE		：获取失败
+//
+BOOLEAN __ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, PMODE_INFO pMode);
 
-BOOLEAN ZooListLayer_AddRuleToSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule);
+//////////////////////////////////////////////////////////////////////////
+//	插入一个规则到MODE指定的层
+//	参数：
+//		pThis		：整个规则列表的表头
+//		pMod		：要插入到的MODE层信息
+//		pRule		：要插入的规则
+//	返回值：
+//		TRUE		：插入成功
+//		FALSE		：插入失败
+//	注意：
+//		这个函数会直接调用对应层系统里面，对应规则管理系统提供的插入函数
+//
+BOOLEAN __ZooListLayer_AddRuleToSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule);
 
-BOOLEAN ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule);
+//////////////////////////////////////////////////////////////////////////
+//	根据MODE找到一个规则层，从规则层中删除一条规则
+//	参数：
+//		pThis		：整个规则列表的表头
+//		pMod		：要删除的MODE层信息
+//		pRule		：要删除的规则
+//	返回值：
+//		TRUE		：删除成功
+//		FALSE		：删除失败
+//	注意：
+//		这个函数会直接调用对应层系统里面，对应规则管理系统提供的删除函数
+//
+BOOLEAN __ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule);
 
-BOOLEAN ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID pOut);
+//////////////////////////////////////////////////////////////////////////
+//	从整个规则系统中，找到第一条与指定规则匹配的一条规则
+//	参数：
+//		pThis		：整个规则列表头
+//		pRule		：要找到的规则
+//		pOut		：找到的规则从这里输出，理论上来说这里可以空，但是最好别空，不然，从哪找到的都不知道了
+//	返回值：
+//		TRUE		：找到了
+//		FALSE		：没找到
+//
+BOOLEAN __ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID pOut);
 
 //////////////////////////////////////////////////////////////////////////
 //	根据 MODE_INFO 从链表中获取对应层信息
 //	参数：
-//		pListLayer	：整个规则列表的表头
+//		pThis		：整个规则列表的表头
 //		pModInfo	：要获取的对应层信息
 //		ppLayerInfo	：最终取出的层指针，如果获取失败，此参数值不变
 //						如果此参数为空，则默认不返回此值，且不影响函数调用
@@ -157,63 +213,90 @@ BOOLEAN ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID 
 //		>0		：层相同，但是名字不同
 //		<0		：都不相同，没有找到合适的
 //
-LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
+LONG __ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
 
 //////////////////////////////////////////////////////////////////////////
 //	根据 MODE_INFO 从链表中获取对应层信息
 //		如果没有找到则创建，创建失败则返回失败
 //	参数：
-//		pListLayer	：整个规则列表的表头
+//		pThis		：整个规则列表的表头
 //		pModInfo	：要获取的对应层信息
 //		ppLayerInfo	：最终取出的层指针，如果获取失败，此参数值不变
 //	返回值：
 //		TRUE	：存在，或者不存在的情况下创建成功了
 //		FALSE	：不存在，并且创建也失败
 //
-BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
+BOOLEAN __ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
 
 //////////////////////////////////////////////////////////////////////////
 //	根据层索引从链表中获取对应层信息，一般用来做枚举，不提供创建功能
 //	参数：
-//		pListLayer	：整个规则列表的表头
+//		pThis		：整个规则列表的表头
 //		ulIndex		：要获取的对应层索引，索引从0 开始
 //		ppLayerInfo	：最终取出的层指针，如果获取失败，此参数值不变
 //	返回值：
 //		TRUE	：存在
 //		FALSE	：不存在
 //
-BOOLEAN ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVOID *ppLayerInfo);
+BOOLEAN __ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVOID *ppLayerInfo);
 
 //////////////////////////////////////////////////////////////////////////
 //	创建一个层信息，插入层列表，并且返回
 //	参数：
-//		pListLayer	：整个规则列表的表头
+//		pThis		：整个规则列表的表头
 //		pModInfo	：要创建的对应层信息
 //		ppLayerInfo	：最终取出的层指针，如果创建失败，此参数值不变
 //	返回值：
 //		TRUE	：创建成功
 //		FALSE	：创建失败
 //
-BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
+BOOLEAN __ZooListLayer_CreateLayerInfoToList(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
 
+//////////////////////////////////////////////////////////////////////////
 //	获取当前指定层的 Mode
-BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, PMODE_INFO pMode);
+//	参数：
+//		pThis		：整个规则的列表头（这里可以空）
+//		pLayer		：要获取的层节点
+//		pMode		：获取出来的节点MODE信息
+//	返回值：
+//		TRUE		：获取成功
+//		FALSE		：获取失败
+//
+BOOLEAN __ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, PMODE_INFO pMode);
 
 //////////////////////////////////////////////////////////////////////////
 //	创建一个层信息，插入层列表，并且返回，
 //		当前函数非常危险，此函数不判断原层次节点是否存在，不建议外部使用
 //	参数：
-//		pListLayer	：整个规则列表的表头
+//		pThis		：整个规则列表的表头
 //		pModInfo	：要创建的对应层信息
 //		ppLayerInfo	：最终取出的层指针，如果创建失败，此参数值不变
 //	返回值：
 //		TRUE	：创建成功
 //		FALSE	：创建失败
 //
-BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
+BOOLEAN __ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
 
+//////////////////////////////////////////////////////////////////////////
+//	给当前层增加引用计数
+//	参数：
+//		pThis		：整个规则列表头
+//		ppLayerInfo	：要增加引用计数的层
+//	返回值：
+//		TRUE		：增加成功
+//		FALSE		：增加失败
+//
 BOOLEAN __ZooListLayer_AchieveLayerInfoFromList(PVOID pThis, PVOID *ppLayerInfo);
 
+//////////////////////////////////////////////////////////////////////////
+//	给当前层减少引用计数
+//	参数：
+//		pThis		：整个规则列表头
+//		ppLayerInfo	：要减少引用计数的层
+//	返回值：
+//		TRUE		：减少成功
+//		FALSE		：减少失败
+//
 BOOLEAN __ZooListLayer_ReleaseLayerInfoToList(PVOID pThis, PVOID *ppLayerInfo);
 
 
@@ -222,7 +305,7 @@ BOOLEAN __ZooListLayer_ReleaseLayerInfoToList(PVOID pThis, PVOID *ppLayerInfo);
 //////////////////////////////////////////////////////////////////////////
 //	匹配当前规则是否在当前层中
 //	参数：
-//		pLayerInfo	：当前层指针
+//		pThis		：当前层指针
 //		pRule		：要寻找的规则
 //		pOut		：输出的数据，当前匹配到的规则，供上层记录
 //	返回值：
@@ -235,7 +318,7 @@ BOOLEAN __ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut);
 //	初始化层节点结构
 //		当前函数只负责初始化，其他的啥都不干
 //	参数：
-//		pLayerInfo	：要初始化的节点指针
+//		pThis		：要初始化的节点指针
 //		pMode		：节点当前信息
 //	返回值：
 //		TRUE	：初始化成功
@@ -246,16 +329,23 @@ BOOLEAN __ZooLayerInfo_InitLayerInfo(PVOID pThis, PMODE_INFO pMode, ULONG dwRule
 //////////////////////////////////////////////////////////////////////////
 //	销毁层节点结构
 //	参数：
-//		pLayerInfo	：要销毁的节点指针
+//		pThis		：要销毁的节点指针
 //	返回值：
 //		TRUE	：销毁成功
 //		FALSE	：销毁失败
 //
 BOOLEAN __ZooLayerInfo_DestoryLayerInfo(PVOID pThis);
 
-
-
-//	获取当前层的 MODE
+//////////////////////////////////////////////////////////////////////////
+//	获取当前指定层的 Mode
+//	参数：
+//		pThis		：要获取的层节点
+//		pMode		：获取出来的节点MODE信息
+//	返回值：
+//		TRUE		：获取成功
+//		FALSE		：获取失败
+//
+//
 BOOLEAN __ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode);
 
 
@@ -1255,7 +1345,7 @@ BOOLEAN ZooListLayer_DestoryListLayer(PVOID *pThis)
 	return bRet;
 }
 
-static LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
 	LONG lRet = -1;
 	do 
@@ -1280,18 +1370,7 @@ static LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModIn
 	return lRet;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	创建一个层信息，插入层列表，并且返回，
-//		当前函数非常危险，此函数不判断原层次节点是否存在，不建议外部使用
-//	参数：
-//		pListLayer	：整个规则列表的表头
-//		pModInfo	：要创建的对应层信息
-//		ppLayerInfo	：最终取出的层指针，如果创建失败，此参数值不变
-//	返回值：
-//		TRUE	：创建成功
-//		FALSE	：创建失败
-//
-static BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
 	BOOLEAN bRet = FALSE;
 	do 
@@ -1315,7 +1394,7 @@ static BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INF
 	return bRet;
 }
 
-static BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
 	BOOLEAN bRet = FALSE;
 	do
@@ -1360,7 +1439,7 @@ BOOLEAN ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVO
 	return bRet;
 }
 
-static BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
 	BOOLEAN bRet = FALSE;
 	do
@@ -1430,7 +1509,7 @@ BOOLEAN ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod
 	return bRet;
 }
 
-static BOOLEAN ZooListLayer_AchieveLayerInfoFromList(PVOID pThis, PVOID *ppLayerInfo)
+BOOLEAN ZooListLayer_AchieveLayerInfoFromList(PVOID pThis, PVOID *ppLayerInfo)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	LAYER_INFO* pListInfo = NULL;
@@ -1492,16 +1571,24 @@ ULONG ZooListLayer_GetLayerInfoCount(PVOID pThis)
 	return 0;
 }
 
-static BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, PMODE_INFO pMode)
+BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, PMODE_INFO pMode)
 {
 	if (__IsInvalidPoint(pThis))
+	{
+		return FALSE;
+	}
+	if (__IsInvalidPoint(pLayer))
+	{
+		return FALSE;
+	}
+	if (__IsInvalidPoint(pMode))
 	{
 		return FALSE;
 	}
 	return __ZooListLayer_GetLayerInfoMode(pThis, pLayer, pMode);
 }
 
-static BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, PMODE_INFO pMode)
+BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, PMODE_INFO pMode)
 {
 	BOOLEAN bRet = FALSE;
 
@@ -1525,7 +1612,7 @@ static BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, 
 
 
 
-static BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
+BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
 {
 	BOOLEAN bRet = FALSE;
 	do 
@@ -1549,7 +1636,7 @@ static BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut
 	return bRet;
 }
 
-static BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, PMODE_INFO pMode, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pFun)
+BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, PMODE_INFO pMode, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pFun)
 {
 	BOOLEAN bRet = FALSE;
 	do 
@@ -1590,7 +1677,7 @@ static BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, PMODE_INFO pMode, ULONG d
 	return bRet;
 }
 
-static BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
+BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
 {
 	BOOLEAN bRet = FALSE;
 	do 
@@ -1605,7 +1692,7 @@ static BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
 	return bRet;
 }
 
-static BOOLEAN ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode)
+BOOLEAN ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode)
 {
 	BOOLEAN bRet = FALSE;
 	do 
