@@ -1106,26 +1106,6 @@ static BOOLEAN __ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode)
 	return bRet;
 }
 
-static BOOLEAN ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode)
-{
-	BOOLEAN bRet = FALSE;
-	do 
-	{
-		if (__IsInvalidPoint(pThis))
-		{
-			break;
-		}
-		if (__IsInvalidPoint(pMode))
-		{
-			break;
-		}
-		
-		bRet = __ZooLayerInfo_GetLayerInfoMode(pThis, pMode);
-	} while (FALSE);
-
-	return bRet;
-}
-
 
 
 
@@ -1622,5 +1602,25 @@ static BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
 
 		bRet = __ZooLayerInfo_DestoryLayerInfo(pThis);
 	} while (FALSE);
+	return bRet;
+}
+
+static BOOLEAN ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode)
+{
+	BOOLEAN bRet = FALSE;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pMode))
+		{
+			break;
+		}
+
+		bRet = __ZooLayerInfo_GetLayerInfoMode(pThis, pMode);
+	} while (FALSE);
+
 	return bRet;
 }
