@@ -59,6 +59,7 @@
 #pragma once
 
 //	这里是需要支持的全部变量类型
+#ifndef _WINDOWS_
 typedef long BOOLEAN;
 typedef long LONG;
 typedef unsigned long ULONG;
@@ -75,6 +76,7 @@ typedef char * ULONG_PTR;
 #define FALSE 0
 #ifndef NULL
 #define NULL 0
+#endif
 #endif
 
 
@@ -93,8 +95,20 @@ typedef struct _MODE_INFO
 	//	如果一个IO请求被一条规则拦截了，用它来区分具体是被哪个模块的规则拦截了，
 	//	不会出现一个层下面有两个名字，的情况，如果出现了，则第二个名字所对应的规则无效
 	char strFrom[8];
-}MODE_INFO;
+}MODE_INFO, *PMODE_INFO;
 
+//	原子操作加法
+typedef PVOID (*ZooTypeFunc_Standard_StdInterlockedAdd)(PVOID pThis, ULONG *ulNumber, ULONG ulAdd);
+
+//	原子操作减法
+typedef PVOID (*ZooTypeFunc_Standard_StdInterlockedSub)(PVOID pThis, ULONG *ulNumber, ULONG ulAdd);
+
+
+typedef struct _LIST_STANDARD_LIB_FUNCTION 
+{
+	ZooTypeFunc_Standard_StdInterlockedAdd StdInterlockedAdd;
+	ZooTypeFunc_Standard_StdInterlockedSub StdInterlockedSub;
+}LIST_STANDARD_LIB_FUNCTION ,*PLIST_STANDARD_LIB_FUNCTION;
 
 
 
@@ -261,6 +275,7 @@ typedef struct _LIST_FUNCTION_LIST
 	LIST_LAYER_MEMORY_FUNCTION lmf;
 	LIST_INFO_MEMORY_FUNCTION imf;
 	LIST_RULE_MEMORY_FUNCTION rmf;
+	LIST_STANDARD_LIB_FUNCTION lsf;
 }LIST_FUNCTION_LIST ,*PLIST_FUNCTION_LIST;
 
 

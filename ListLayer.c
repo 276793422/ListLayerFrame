@@ -82,9 +82,10 @@ typedef struct _LIST_LAYER
 	ULONG dwIndex;							//	当前链表指针所在的索引
 	PLIST_ENTRY pCurrent;					//	当前链表指针，配合索引可以在循环遍历LIST的时候，更快一点
 
-	LIST_LAYER_MEMORY_FUNCTION lmf;			//	内部需要用到的函数组
-	LIST_INFO_MEMORY_FUNCTION imf;			//	内部需要用到的函数组
-	LIST_RULE_MEMORY_FUNCTION rmf;
+	LIST_LAYER_MEMORY_FUNCTION lmf;			//
+	LIST_INFO_MEMORY_FUNCTION imf;			//
+	LIST_RULE_MEMORY_FUNCTION rmf;			//
+	LIST_STANDARD_LIB_FUNCTION lsf;
 
 	ULONG dwRuleTableBufLen;				//	规则结构的长度，也就是新建规则的时候，内部申请的长度
 
@@ -97,9 +98,9 @@ typedef struct _LIST_LAYER
 
 typedef struct _LAYER_INFO
 {
-	LIST_ENTRY node;
+	LIST_ENTRY node;						//	层节点，挂载在层HEAD里面的
 
-	MODE_INFO info;
+	MODE_INFO info;							//	层标识，标识当前层信息
 
 	PVOID pRuleTablePool;					//	内部资源缓冲区
 	PVOID pRuleTablePoolLock;				//	访问缓冲区所需要的锁
@@ -136,11 +137,11 @@ BOOLEAN ZooListLayer_DestoryListLayer(PVOID *pThis);
 //
 ULONG ZooListLayer_GetLayerInfoCount(PVOID pThis);
 
-BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, MODE_INFO* pMode);
+BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, PMODE_INFO pMode);
 
-BOOLEAN ZooListLayer_AddRuleToSpecifyRuleTable(PVOID pThis, MODE_INFO *pMod, PVOID pRule);
+BOOLEAN ZooListLayer_AddRuleToSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule);
 
-BOOLEAN ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, MODE_INFO *pMod, PVOID pRule);
+BOOLEAN ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule);
 
 BOOLEAN ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID pOut);
 
@@ -156,7 +157,7 @@ BOOLEAN ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID 
 //		>0		：层相同，但是名字不同
 //		<0		：都不相同，没有找到合适的
 //
-LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo);
+LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
 
 //////////////////////////////////////////////////////////////////////////
 //	根据 MODE_INFO 从链表中获取对应层信息
@@ -169,7 +170,7 @@ LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, MODE_INFO *pModInfo, PVO
 //		TRUE	：存在，或者不存在的情况下创建成功了
 //		FALSE	：不存在，并且创建也失败
 //
-BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo);
+BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
 
 //////////////////////////////////////////////////////////////////////////
 //	根据层索引从链表中获取对应层信息，一般用来做枚举，不提供创建功能
@@ -193,10 +194,10 @@ BOOLEAN ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVO
 //		TRUE	：创建成功
 //		FALSE	：创建失败
 //
-BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo);
+BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
 
 //	获取当前指定层的 Mode
-BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, MODE_INFO* pMode);
+BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, PMODE_INFO pMode);
 
 //////////////////////////////////////////////////////////////////////////
 //	创建一个层信息，插入层列表，并且返回，
@@ -209,7 +210,13 @@ BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, MODE_INFO* pMod
 //		TRUE	：创建成功
 //		FALSE	：创建失败
 //
-BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo);
+BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo);
+
+BOOLEAN __ZooListLayer_AchieveLayerInfoFromList(PVOID pThis, PVOID *ppLayerInfo);
+
+BOOLEAN __ZooListLayer_ReleaseLayerInfoToList(PVOID pThis, PVOID *ppLayerInfo);
+
+
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -222,7 +229,7 @@ BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, MODE_INFO *pModI
 //		TRUE	：匹配到规则，也就是命中规则
 //		FALSE	：没有命中规则
 //		
-BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut);
+BOOLEAN __ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut);
 
 //////////////////////////////////////////////////////////////////////////
 //	初始化层节点结构
@@ -234,7 +241,7 @@ BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut);
 //		TRUE	：初始化成功
 //		FALSE	：初始化失败
 //
-BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, MODE_INFO* pMode, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pFun);
+BOOLEAN __ZooLayerInfo_InitLayerInfo(PVOID pThis, PMODE_INFO pMode, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pFun);
 
 //////////////////////////////////////////////////////////////////////////
 //	销毁层节点结构
@@ -244,12 +251,12 @@ BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, MODE_INFO* pMode, ULONG dwRuleTa
 //		TRUE	：销毁成功
 //		FALSE	：销毁失败
 //
-BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis);
+BOOLEAN __ZooLayerInfo_DestoryLayerInfo(PVOID pThis);
 
 
 
 //	获取当前层的 MODE
-BOOLEAN ZooLayerInfo_GetLayerInfoMode(PVOID pThis, MODE_INFO* pMode);
+BOOLEAN __ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode);
 
 
 #ifdef __ZOO_RULE_TABLE_INSIDE_INIT__
@@ -299,7 +306,7 @@ BOOLEAN ZooRuleTable_AddRuleToTable(PVOID pRuleTable, PVOID pRule);
 
 #endif
 
-static BOOLEAN _TestListLayerMemoryFunctionIsInvalid(PLIST_LAYER_MEMORY_FUNCTION pFun)
+static BOOLEAN __TestListLayerMemoryFunctionIsInvalid(PLIST_LAYER_MEMORY_FUNCTION pFun)
 {
 	BOOLEAN bRet = TRUE;
 	do 
@@ -387,7 +394,7 @@ static BOOLEAN _TestListLayerMemoryFunctionIsInvalid(PLIST_LAYER_MEMORY_FUNCTION
 }
 
 
-static BOOLEAN _TestListInfoMemoryFunctionIsInvalid(PLIST_INFO_MEMORY_FUNCTION pFun)
+static BOOLEAN __TestListInfoMemoryFunctionIsInvalid(PLIST_INFO_MEMORY_FUNCTION pFun)
 {
 	BOOLEAN bRet = TRUE;
 
@@ -447,7 +454,7 @@ static BOOLEAN _TestListInfoMemoryFunctionIsInvalid(PLIST_INFO_MEMORY_FUNCTION p
 	return bRet;
 }
 
-static BOOLEAN _TestRuleTableMemoryFunctionIsInvalid(PLIST_RULE_MEMORY_FUNCTION pFun)
+static BOOLEAN __TestRuleTableMemoryFunctionIsInvalid(PLIST_RULE_MEMORY_FUNCTION pFun)
 {
 	BOOLEAN bRet = TRUE;
 
@@ -479,31 +486,35 @@ static BOOLEAN _TestRuleTableMemoryFunctionIsInvalid(PLIST_RULE_MEMORY_FUNCTION 
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_InitListLayer(PVOID *pThis, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pLfl)
+static BOOLEAN __TestStdLibMemoryFunctionIsInvalid(PLIST_STANDARD_LIB_FUNCTION pFun)
 {
-	PLIST_LAYER pListLayer = NULL;
-	PLIST_LAYER_MEMORY_FUNCTION pFun = NULL;
-	BOOLEAN bRet = FALSE;
-	NTSTATUS ntStatus = STATUS_SUCCESS;
+	BOOLEAN bRet = TRUE;
+
 	do 
 	{
-		if (__IsInvalidPoint(pLfl))
+		if (__IsInvalidPoint(pFun->StdInterlockedAdd))
 		{
 			break;
 		}
-		if (dwRuleTableBufLen == 0)
-		{
-			break;
-		}
-		if (_TestListLayerMemoryFunctionIsInvalid(&pLfl->lmf))
-		{
-			break;
-		}
-		if (_TestListInfoMemoryFunctionIsInvalid(&pLfl->imf))
+		if (__IsInvalidPoint(pFun->StdInterlockedSub))
 		{
 			break;
 		}
 
+		bRet = FALSE;
+	} while (FALSE);
+	return bRet;
+}
+
+//	INIT
+static BOOLEAN __ZooListLayer_InitListLayer(PVOID *pThis, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pLfl)
+{
+	PLIST_LAYER pListLayer = NULL;
+	PLIST_LAYER_MEMORY_FUNCTION pFun = NULL;
+	BOOLEAN bRet = FALSE;
+	*pThis = NULL;
+	do 
+	{
 		pListLayer = pLfl->lmf.AllocListMemory(sizeof(LIST_LAYER));
 		if (__IsInvalidPoint(pListLayer))
 		{
@@ -514,6 +525,7 @@ BOOLEAN ZooListLayer_InitListLayer(PVOID *pThis, ULONG dwRuleTableBufLen, PLIST_
 		pListLayer->lmf = pLfl->lmf;
 		pListLayer->imf = pLfl->imf;
 		pListLayer->rmf = pLfl->rmf;
+		pListLayer->lsf = pLfl->lsf;
 
 		pFun = &pListLayer->lmf;
 
@@ -543,20 +555,16 @@ BOOLEAN ZooListLayer_InitListLayer(PVOID *pThis, ULONG dwRuleTableBufLen, PLIST_
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_DestoryListLayer(PVOID *pThis)
+//	DESTROY
+static BOOLEAN __ZooListLayer_DestoryListLayer(PVOID *pThis)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)(*pThis);
 	PLIST_LAYER_MEMORY_FUNCTION pFun = NULL;
 	BOOLEAN bRet = FALSE;
-	NTSTATUS ntStatus = STATUS_SUCCESS;
 	PLAYER_INFO pLayerInfo;
 	PLAYER_INFO n;
 	do
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
 		pFun = &pListLayer->lmf;
 
 		pFun->GetRuleInfoPoolLockForWrite(*pThis, pListLayer->pListInfoPoolLock);
@@ -568,7 +576,7 @@ BOOLEAN ZooListLayer_DestoryListLayer(PVOID *pThis)
 			__RemoveEntryList(&(pLayerInfo->node));
 
 			//	销毁内存
-			ZooLayerInfo_DestoryLayerInfo(pLayerInfo);
+			__ZooLayerInfo_DestoryLayerInfo(pLayerInfo);
 
 			//	释放内存
 			pFun->FreeListInfoToPool(*pThis, pListLayer->pListInfoPool, pLayerInfo);
@@ -596,28 +604,15 @@ BOOLEAN ZooListLayer_DestoryListLayer(PVOID *pThis)
 	return bRet;
 }
 
-LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo)
+static LONG __ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	LONG lRet = -1;
-	PLIST_ENTRY pNode = NULL;
 	PLAYER_INFO pLayerInfo = NULL;
 	PLAYER_INFO n;
 	do 
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-		if (__IsInvalidPoint(pModInfo))
-		{
-			break;
-		}
-
-		if (__IsInvalidPoint(ppLayerInfo))
-		{
-			break;
-		}
+		*ppLayerInfo = NULL;
 
 		//	循环寻找内部
 		__LIST_FOR_EACH_ENTRY_SAFE(pLayerInfo, n, &pListLayer->head, LAYER_INFO, node)
@@ -631,6 +626,8 @@ LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, MODE_INFO *pModInfo, PVO
 					if (!__IsInvalidPoint(ppLayerInfo))
 					{
 						*ppLayerInfo = pLayerInfo;
+						//	只有在从内部取出的时候，才增加引用计数
+						__ZooListLayer_AchieveLayerInfoFromList(pThis, ppLayerInfo);
 					}
 					lRet = 0;
 				}
@@ -648,18 +645,7 @@ LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, MODE_INFO *pModInfo, PVO
 	return lRet;
 }
 
-//////////////////////////////////////////////////////////////////////////
-//	创建一个层信息，插入层列表，并且返回，
-//		当前函数非常危险，此函数不判断原层次节点是否存在，不建议外部使用
-//	参数：
-//		pListLayer	：整个规则列表的表头
-//		pModInfo	：要创建的对应层信息
-//		ppLayerInfo	：最终取出的层指针，如果创建失败，此参数值不变
-//	返回值：
-//		TRUE	：创建成功
-//		FALSE	：创建失败
-//
-BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo)
+static BOOLEAN __ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	PLIST_LAYER_MEMORY_FUNCTION pFun = NULL;
@@ -670,14 +656,6 @@ BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, MODE_INFO *pModI
 	PLAYER_INFO n = NULL;
 	do 
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-		if (__IsInvalidPoint(pModInfo))
-		{
-			break;
-		}
 		pFun = &pListLayer->lmf;
 
 		//	直接创建一个
@@ -691,7 +669,7 @@ BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, MODE_INFO *pModI
 		lfl.imf = pListLayer->imf;
 		lfl.rmf = pListLayer->rmf;
 		//	初始化
-		if (!ZooLayerInfo_InitLayerInfo(pLayerInfo, pModInfo, pListLayer->dwRuleTableBufLen, &lfl))
+		if (!__ZooLayerInfo_InitLayerInfo(pLayerInfo, pModInfo, pListLayer->dwRuleTableBufLen, &lfl))
 		{
 			break;
 		}
@@ -731,29 +709,23 @@ BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, MODE_INFO *pModI
 		pListLayer->pCurrent = NULL;
 
 		*ppLayerInfo = pLayerInfo;
+
+		//	引用计数初始值为2，是因为，1点引用计数是创建的时候给的，另外1点引用计数是创建之后直接就要用，然后给的。
+		pLayerInfo->dwUse = 2;
 		bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo)
+static BOOLEAN __ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	BOOLEAN bRet = FALSE;
 	LONG lRet = 0;
 	do
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-		if (__IsInvalidPoint(pModInfo))
-		{
-			break;
-		}
-
-		lRet = ZooListLayer_GetLayerInfoFromListByID(pListLayer, pModInfo, ppLayerInfo);
+		lRet = __ZooListLayer_GetLayerInfoFromListByID(pListLayer, pModInfo, ppLayerInfo);
 		if (lRet == 0)
 		{
 			//	如果找到则直接返回
@@ -766,7 +738,7 @@ BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, MODE_INFO *p
 			break;
 		}
 
-		if (ZooListLayer_CreateLayerInfoToListNoSearch(pListLayer, pModInfo, ppLayerInfo))
+		if (__ZooListLayer_CreateLayerInfoToListNoSearch(pListLayer, pModInfo, ppLayerInfo))
 		{
 			//	创建成功了
 			bRet = TRUE;
@@ -779,25 +751,14 @@ BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, MODE_INFO *p
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVOID *ppLayerInfo)
+static BOOLEAN __ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVOID *ppLayerInfo)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	PLIST_LAYER_MEMORY_FUNCTION pFun = NULL;
 	BOOLEAN bRet = FALSE;
-	NTSTATUS ntStatus = STATUS_SUCCESS;
 	ULONG uIndex = 0;
 	do
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-
-		if (__IsInvalidPoint(ppLayerInfo))
-		{
-			break;
-		}
-
 		if (pListLayer->dwCount == 0)
 		{
 			break;
@@ -891,28 +852,18 @@ BOOLEAN ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVO
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, MODE_INFO *pModInfo, PVOID *ppLayerInfo)
+static BOOLEAN __ZooListLayer_CreateLayerInfoToList(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
 {
-	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	BOOLEAN bRet = FALSE;
 	do
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-		if (__IsInvalidPoint(pModInfo))
-		{
-			break;
-		}
-
-		if (!ZooListLayer_GetLayerInfoFromListByID(pListLayer, pModInfo, ppLayerInfo))
+		if (!__ZooListLayer_GetLayerInfoFromListByID(pThis, pModInfo, ppLayerInfo))
 		{
 			//	如果找到则直接返回失败
 			break;
 		}
 
-		if (ZooListLayer_CreateLayerInfoToListNoSearch(pListLayer, pModInfo, ppLayerInfo))
+		if (__ZooListLayer_CreateLayerInfoToListNoSearch(pThis, pModInfo, ppLayerInfo))
 		{
 			//	创建成功了
 			bRet = TRUE;
@@ -925,52 +876,72 @@ BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, MODE_INFO *pModInfo, PVO
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_AddRuleToSpecifyRuleTable(PVOID pThis, MODE_INFO *pMod, PVOID pRule)
+static BOOLEAN __ZooListLayer_ReleaseLayerInfoToList(PVOID pThis, PVOID *ppLayerInfo)
+{
+	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
+	LAYER_INFO* pListInfo = NULL;
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(ppLayerInfo))
+		{
+			break;
+		}
+		pListInfo = (LAYER_INFO*)*ppLayerInfo;
+		if (__IsInvalidPoint(pListInfo))
+		{
+			break;
+		}
+
+		pListLayer->lsf.StdInterlockedSub(NULL, &(pListInfo->dwUse), 1);
+		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+static BOOLEAN __ZooListLayer_AchieveLayerInfoFromList(PVOID pThis, PVOID *ppLayerInfo)
+{
+	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
+	LAYER_INFO* pListInfo = NULL;
+	pListInfo = (LAYER_INFO*)*ppLayerInfo;
+
+	pListLayer->lsf.StdInterlockedAdd(NULL, &(pListInfo->dwUse), 1);
+
+	return TRUE;
+}
+
+static BOOLEAN __ZooListLayer_AddRuleToSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	BOOLEAN bRet = FALSE;
-	PLAYER_INFO pLayerInfo;
+	PLAYER_INFO pLayerInfo = NULL;
 	do
 	{
-		if (__IsInvalidPoint(pListLayer))
+		if (!__ZooListLayer_GetLayerInfoFromListByIDAndCreate(pThis, pMod, &pLayerInfo))
 		{
-			break;
-		}
-		if (__IsInvalidPoint(pRule))
-		{
-			break;
-		}
-		if (!ZooListLayer_GetLayerInfoFromListByIDAndCreate(pListLayer, pMod, &pLayerInfo))
-		{
-			//	没找到完全相同的
+			//	没找到完全相同的，就是说有其他占坑了
 			break;
 		}
 		//	找到了，或者创建了
 
 		//	直接插入
 		bRet = pLayerInfo->rmf.AddRuleToTable(pLayerInfo, pLayerInfo->RuleTable, pLayerInfo->pRuleTablePool, pLayerInfo->pRuleTablePoolLock, pRule);
+
+		__ZooListLayer_ReleaseLayerInfoToList(pThis, &pLayerInfo);
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, MODE_INFO *pMod, PVOID pRule)
+static BOOLEAN __ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	BOOLEAN bRet = FALSE;
-	PLAYER_INFO pLayerInfo;
+	PLAYER_INFO pLayerInfo = NULL;
 	do
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-		if (__IsInvalidPoint(pRule))
-		{
-			break;
-		}
-
-		if (ZooListLayer_GetLayerInfoFromListByID(pListLayer, pMod, &pLayerInfo))
+		if (__ZooListLayer_GetLayerInfoFromListByID(pThis, pMod, &pLayerInfo))
 		{
 			//	没找到完全相同的
 			break;
@@ -978,12 +949,14 @@ BOOLEAN ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, MODE_INFO *pMod
 
 		//	删除规则
 		bRet = pLayerInfo->rmf.RemoveRuleFromTable(pLayerInfo, pLayerInfo->RuleTable, pLayerInfo->pRuleTablePool, pLayerInfo->pRuleTablePoolLock, pRule);
+
+		__ZooListLayer_ReleaseLayerInfoToList(pThis, &pLayerInfo);
 	} while (FALSE);
 
 	return bRet;
 }
 
-BOOLEAN ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
+static BOOLEAN __ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
 	BOOLEAN bRet = FALSE;
@@ -992,72 +965,45 @@ BOOLEAN ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID 
 
 	do
 	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-		if (__IsInvalidPoint(pRule))
-		{
-			break;
-		}
-
 		//	遍历自己的内部，找每个子层，看是否有信息
 		__LIST_FOR_EACH_ENTRY_SAFE(pLayerInfo, n, &pListLayer->head, LAYER_INFO, node)
 		{
-			bRet = ZooLayerInfo_SearchRuleTable(pLayerInfo, pRule, pOut);
+			bRet = __ZooLayerInfo_SearchRuleTable(pLayerInfo, pRule, pOut);
 			if (bRet == TRUE)
 			{
 				break;
 			}
 		}
-		//bRet = TRUE;
 	} while (FALSE);
 
 	return bRet;
 }
 
-ULONG ZooListLayer_GetLayerInfoCount(PVOID pThis)
+static ULONG __ZooListLayer_GetLayerInfoCount(PVOID pThis)
 {
 	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
-	do
-	{
-		if (__IsInvalidPoint(pListLayer))
-		{
-			break;
-		}
-
-		return pListLayer->dwCount;
-	} while (FALSE);
-
-	return 0;
+	return pListLayer->dwCount;
 }
 
-BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, MODE_INFO* pMode)
+static BOOLEAN __ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, PMODE_INFO pMode)
 {
-	if (__IsInvalidPoint(pThis))
-	{
-		return FALSE;
-	}
-	return ZooLayerInfo_GetLayerInfoMode(pLayer, pMode);
+	return __ZooLayerInfo_GetLayerInfoMode(pLayer, pMode);
 }
 
-BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, MODE_INFO* pMode)
+static BOOLEAN __ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, PMODE_INFO pMode)
 {
 	PVOID pLayer = NULL;
 	BOOLEAN bRet = FALSE;
-	if (__IsInvalidPoint(pThis))
-	{
-		return FALSE;
-	}
-	
 	do 
 	{
-		if (!ZooListLayer_GetLayerInfoFromListByIndex(pThis, ulIndex, &pLayer))
+		if (!__ZooListLayer_GetLayerInfoFromListByIndex(pThis, ulIndex, &pLayer))
 		{
 			break;
 		}
 
-		bRet = ZooLayerInfo_GetLayerInfoMode(pLayer, pMode);;
+		bRet = __ZooLayerInfo_GetLayerInfoMode(pLayer, pMode);;
+
+		__ZooListLayer_ReleaseLayerInfoToList(pThis, &pLayer);
 	} while (FALSE);
 
 	return bRet;
@@ -1069,53 +1015,17 @@ BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, MODE_IN
 
 
 
-BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
+static BOOLEAN __ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
 {
 	PLAYER_INFO pLayerInfo = (PLAYER_INFO)pThis;
-	BOOLEAN bRet = FALSE;
-
-	if (__IsInvalidPoint(pLayerInfo))
-	{
-		return FALSE;
-	}
-	if (__IsInvalidPoint(pRule))
-	{
-		return FALSE;
-	}
-	do 
-	{
-		//	查询规则
-		//bRet = RuleTable_SearchRuleTable(pLayerInfo->RuleTable, pRule, pOut);
-		bRet = pLayerInfo->rmf.SearchRuleInTable(pLayerInfo, pLayerInfo->RuleTable, pLayerInfo->pRuleTablePool, pLayerInfo->pRuleTablePoolLock, pRule, pOut);
-	} while (FALSE);
-
-	return bRet;
+	//	查询规则
+	return pLayerInfo->rmf.SearchRuleInTable(pLayerInfo, pLayerInfo->RuleTable, pLayerInfo->pRuleTablePool, pLayerInfo->pRuleTablePoolLock, pRule, pOut);
 }
 
-BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, MODE_INFO* pMode, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pFun)
+static BOOLEAN __ZooLayerInfo_InitLayerInfo(PVOID pThis, PMODE_INFO pMode, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pFun)
 {
 	PLAYER_INFO pLayerInfo = (PLAYER_INFO)pThis;
 	BOOLEAN bRet = FALSE;
-	if (__IsInvalidPoint(pLayerInfo))
-	{
-		return FALSE;
-	}
-
-	if (__IsInvalidPoint(pMode))
-	{
-		return FALSE;
-	}
-
-	if (_TestListInfoMemoryFunctionIsInvalid(&pFun->imf))
-	{
-		return FALSE;
-	}
-
-	if (dwRuleTableBufLen == 0)
-	{
-		return FALSE;
-	}
-
 	do 
 	{
 		pLayerInfo->imf = pFun->imf;
@@ -1135,8 +1045,6 @@ BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, MODE_INFO* pMode, ULONG dwRuleTa
 		pLayerInfo->pRuleTablePoolLock = pLayerInfo->imf.InitRuleTablePoolLock(pLayerInfo);
 
 		//	最后初始化存储结构
-		//		pInfo->RuleTable
-		//RuleTable_InitRuleTable(&pLayerInfo->RuleTable);
 		pLayerInfo->RuleTable = pLayerInfo->rmf.InitRuleTable(pLayerInfo, pLayerInfo->pRuleTablePool);
 
 		bRet = TRUE;
@@ -1145,25 +1053,24 @@ BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, MODE_INFO* pMode, ULONG dwRuleTa
 	return bRet;
 }
 
-BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
+//	销毁一个指定的图层
+//	这个函数实际上应该是由减引用计数的函数来调用，如果
+static BOOLEAN __ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
 {
 	PLAYER_INFO pLayerInfo = (PLAYER_INFO)pThis;
 	PLIST_INFO_MEMORY_FUNCTION pFun = NULL;
 	BOOLEAN bRet = FALSE;
-	if (__IsInvalidPoint(pLayerInfo))
-	{
-		return FALSE;
-	}
 
 	do 
 	{
+		//printf("0x%08X , dwUse = %d \n", pThis, pLayerInfo->dwUse);
+
 		pFun = &pLayerInfo->imf;
 
 		//	取锁
 		pFun->GetRuleTablePoolLockForWrite(pThis, pLayerInfo->pRuleTablePoolLock);
 
 		//	释放内部结构
-		//RuleTable_DestoryRuleTable(&pLayerInfo->RuleTable);
 		pLayerInfo->rmf.DestoryRuleTable(pLayerInfo, pLayerInfo->RuleTable, pLayerInfo->pRuleTablePool, pLayerInfo->pRuleTablePoolLock);
 		pLayerInfo->RuleTable = NULL;
 
@@ -1184,24 +1091,36 @@ BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
 	return bRet;
 }
 
-BOOLEAN ZooLayerInfo_GetLayerInfoMode(PVOID pThis, MODE_INFO* pMode)
+static BOOLEAN __ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode)
 {
 	PLAYER_INFO pLayerInfo = (PLAYER_INFO)pThis;
 	PLIST_INFO_MEMORY_FUNCTION pFun = NULL;
 	BOOLEAN bRet = FALSE;
-	if (__IsInvalidPoint(pLayerInfo))
-	{
-		return FALSE;
-	}
-	if (__IsInvalidPoint(pMode))
-	{
-		return FALSE;
-	}
 	pFun = &pLayerInfo->imf;
 	do 
 	{
 		pFun->MemCpy(NULL, pMode, &pLayerInfo->info, sizeof(*pMode));
 		bRet = TRUE;
+	} while (FALSE);
+
+	return bRet;
+}
+
+static BOOLEAN ZooLayerInfo_GetLayerInfoMode(PVOID pThis, PMODE_INFO pMode)
+{
+	BOOLEAN bRet = FALSE;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pMode))
+		{
+			break;
+		}
+		
+		bRet = __ZooLayerInfo_GetLayerInfoMode(pThis, pMode);
 	} while (FALSE);
 
 	return bRet;
@@ -1292,9 +1211,416 @@ BOOLEAN ZooRuleTable_AddRuleToTable(PVOID pRuleTable, PVOID pRule)
 
 #endif
 
+//////////////////////////////////////////////////////////////////////////
+//	以下，全部都是可以导出的外部接口
 
-#undef __LIST_FOR_EACH_SAFE
-#undef __LIST_FOR_EACH_ENTRY_SAFE
-#undef __InsertCurrentToNodeBlink
-#undef __InsertCurrentToNodeFlink
-#undef __InsertMidListNode
+
+
+BOOLEAN ZooListLayer_InitListLayer(PVOID *pThis, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pLfl)
+{
+	BOOLEAN bRet = FALSE;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pLfl))
+		{
+			break;
+		}
+		if (dwRuleTableBufLen == 0)
+		{
+			break;
+		}
+		if (__TestListLayerMemoryFunctionIsInvalid(&pLfl->lmf))
+		{
+			break;
+		}
+		if (__TestListInfoMemoryFunctionIsInvalid(&pLfl->imf))
+		{
+			break;
+		}
+		if (__TestRuleTableMemoryFunctionIsInvalid(&pLfl->rmf))
+		{
+			break;
+		}
+		if (__TestStdLibMemoryFunctionIsInvalid(&pLfl->lsf))
+		{
+			break;
+		}
+		bRet = __ZooListLayer_InitListLayer(pThis, dwRuleTableBufLen, pLfl);
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOLEAN ZooListLayer_DestoryListLayer(PVOID *pThis)
+{
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(*pThis))
+		{
+			break;
+		}
+
+		bRet = __ZooListLayer_DestoryListLayer(pThis);
+	} while (FALSE);
+
+	return bRet;
+}
+
+static LONG ZooListLayer_GetLayerInfoFromListByID(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+{
+	LONG lRet = -1;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pModInfo))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(ppLayerInfo))
+		{
+			break;
+		}
+
+		lRet = __ZooListLayer_GetLayerInfoFromListByID(pThis, pModInfo, ppLayerInfo);
+
+	} while (FALSE);
+
+	return lRet;
+}
+
+//////////////////////////////////////////////////////////////////////////
+//	创建一个层信息，插入层列表，并且返回，
+//		当前函数非常危险，此函数不判断原层次节点是否存在，不建议外部使用
+//	参数：
+//		pListLayer	：整个规则列表的表头
+//		pModInfo	：要创建的对应层信息
+//		ppLayerInfo	：最终取出的层指针，如果创建失败，此参数值不变
+//	返回值：
+//		TRUE	：创建成功
+//		FALSE	：创建失败
+//
+static BOOLEAN ZooListLayer_CreateLayerInfoToListNoSearch(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+{
+	BOOLEAN bRet = FALSE;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pModInfo))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(ppLayerInfo))
+		{
+			break;
+		}
+
+		bRet = __ZooListLayer_CreateLayerInfoToListNoSearch(pThis, pModInfo, ppLayerInfo);
+	} while (FALSE);
+
+	return bRet;
+}
+
+static BOOLEAN ZooListLayer_GetLayerInfoFromListByIDAndCreate(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+{
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pModInfo))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(ppLayerInfo))
+		{
+			break;
+		}
+
+		bRet = __ZooListLayer_GetLayerInfoFromListByIDAndCreate(pThis, pModInfo, ppLayerInfo);
+
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOLEAN ZooListLayer_GetLayerInfoFromListByIndex(PVOID pThis, ULONG ulIndex, PVOID *ppLayerInfo)
+{
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+
+		if (__IsInvalidPoint(ppLayerInfo))
+		{
+			break;
+		}
+
+		bRet = __ZooListLayer_GetLayerInfoFromListByIndex(pThis, ulIndex, ppLayerInfo);
+	} while (FALSE);
+	return bRet;
+}
+
+static BOOLEAN ZooListLayer_CreateLayerInfoToList(PVOID pThis, PMODE_INFO pModInfo, PVOID *ppLayerInfo)
+{
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pModInfo))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(ppLayerInfo))
+		{
+			break;
+		}
+
+		bRet = __ZooListLayer_CreateLayerInfoToList(pThis, pModInfo, ppLayerInfo);
+
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOLEAN ZooListLayer_AddRuleToSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule)
+{
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pMod))
+		{
+			break;
+		}
+		//	添加规则，原则上规则不许为空
+		if (__IsInvalidPoint(pRule))
+		{
+			break;
+		}
+		bRet = __ZooListLayer_AddRuleToSpecifyRuleTable(pThis, pMod, pRule);
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOLEAN ZooListLayer_RemoveRuleFromSpecifyRuleTable(PVOID pThis, PMODE_INFO pMod, PVOID pRule)
+{
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pMod))
+		{
+			break;
+		}
+
+		//	移除规则，这里不管，规则可以删除，外面如果给带内存了，那么也可以带出去
+		bRet = __ZooListLayer_RemoveRuleFromSpecifyRuleTable(pThis, pMod, pRule);
+	} while (FALSE);
+
+	return bRet;
+}
+
+static BOOLEAN ZooListLayer_AchieveLayerInfoFromList(PVOID pThis, PVOID *ppLayerInfo)
+{
+	PLIST_LAYER pListLayer = (PLIST_LAYER)pThis;
+	LAYER_INFO* pListInfo = NULL;
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(ppLayerInfo))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(*ppLayerInfo))
+		{
+			break;
+		}
+
+		bRet = __ZooListLayer_AchieveLayerInfoFromList(pThis, ppLayerInfo);
+	} while (FALSE);
+
+	return bRet;
+}
+
+BOOLEAN ZooListLayer_SearchRuleFromAllRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
+{
+	BOOLEAN bRet = FALSE;
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pRule))
+		{
+			break;
+		}
+
+		//	pOut 不用管，如果要的话，外部会传
+		bRet = __ZooListLayer_SearchRuleFromAllRuleTable(pThis, pRule, pOut);
+	} while (FALSE);
+
+	return bRet;
+}
+
+ULONG ZooListLayer_GetLayerInfoCount(PVOID pThis)
+{
+	do
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+
+		return __ZooListLayer_GetLayerInfoCount(pThis);
+	} while (FALSE);
+
+	return 0;
+}
+
+static BOOLEAN ZooListLayer_GetLayerInfoMode(PVOID pThis, PVOID pLayer, PMODE_INFO pMode)
+{
+	if (__IsInvalidPoint(pThis))
+	{
+		return FALSE;
+	}
+	return __ZooListLayer_GetLayerInfoMode(pThis, pLayer, pMode);
+}
+
+static BOOLEAN ZooListLayer_GetLayerInfoModeByIndex(PVOID pThis, ULONG ulIndex, PMODE_INFO pMode)
+{
+	BOOLEAN bRet = FALSE;
+
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pMode))
+		{
+			break;
+		}
+
+		bRet = __ZooListLayer_GetLayerInfoModeByIndex(pThis, ulIndex, pMode);
+	} while (FALSE);
+
+	return bRet;
+}
+
+
+
+
+static BOOLEAN ZooLayerInfo_SearchRuleTable(PVOID pThis, PVOID pRule, PVOID pOut)
+{
+	BOOLEAN bRet = FALSE;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pRule))
+		{
+			break;
+		}
+		if (__IsInvalidPoint(pOut))
+		{
+			break;
+		}
+		//	查询规则
+		bRet = __ZooLayerInfo_SearchRuleTable(pThis, pRule, pOut);
+	} while (FALSE);
+
+	return bRet;
+}
+
+static BOOLEAN ZooLayerInfo_InitLayerInfo(PVOID pThis, PMODE_INFO pMode, ULONG dwRuleTableBufLen, PLIST_FUNCTION_LIST pFun)
+{
+	BOOLEAN bRet = FALSE;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+
+		if (__IsInvalidPoint(pMode))
+		{
+			break;
+		}
+
+		if (__IsInvalidPoint(pFun))
+		{
+			break;
+		}
+
+		if (dwRuleTableBufLen == 0)
+		{
+			break;
+		}
+
+		if (__TestListInfoMemoryFunctionIsInvalid(&pFun->imf))
+		{
+			break;
+		}
+
+		if (__TestRuleTableMemoryFunctionIsInvalid(&pFun->rmf))
+		{
+			break;
+		}
+
+		bRet = __ZooLayerInfo_InitLayerInfo(pThis, pMode, dwRuleTableBufLen, pFun);
+	} while (FALSE);
+
+	return bRet;
+}
+
+static BOOLEAN ZooLayerInfo_DestoryLayerInfo(PVOID pThis)
+{
+	BOOLEAN bRet = FALSE;
+	do 
+	{
+		if (__IsInvalidPoint(pThis))
+		{
+			break;
+		}
+
+		bRet = __ZooLayerInfo_DestoryLayerInfo(pThis);
+	} while (FALSE);
+	return bRet;
+}
